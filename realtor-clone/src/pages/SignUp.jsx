@@ -5,6 +5,8 @@ import OAuth from "../components/OAuth";
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import {db} from "../firebase";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 
 export default function SignUp() {
@@ -16,6 +18,7 @@ export default function SignUp() {
   });
 
   const { name, email, password } = formData;
+  const navigation = useNavigate();
 
   const onChange = (e) => {
     setFormData((prevData) => ({
@@ -35,8 +38,10 @@ export default function SignUp() {
       delete formDataCopy.password;
       formDataCopy.timestamp = serverTimestamp();
       await setDoc(doc(db, "users", user.uid), formDataCopy)
+      toast.success("Your Account is created successfully")
+      navigation("/")
     } catch (error) {
-      console.log(error)
+      toast.error("Something went wrong with the signup")
     }
   }
   return (
