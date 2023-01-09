@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import OAuth from "../components/OAuth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {db} from "../firebase";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
 
 export default function SignUp() {
@@ -12,12 +15,30 @@ export default function SignUp() {
     name: "",
   });
 
+  const { name, email, password } = formData;
+
   const onChange = (e) => {
     setFormData((prevData) => ({
       ...prevData,
       [e.target.id]: e.target.value,
     }));
   };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+      updateProfile(auth.currentUser, {displayName: name})
+      const user = userCredentials.user;
+      const formDataCopy = {...formData};
+      delete formDataCopy.password;
+      formDataCopy.timestamp = serverTimestamp();
+      await setDoc(doc(db, "users", user.uid), formDataCopy)
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <section>
       <h1 className="text-center text-3xl font-bold mt-7 mb-10">Sign Up</h1>
@@ -30,12 +51,12 @@ export default function SignUp() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
+          <form onSubmit={onSubmit}>
           <input
               className="w-full rounded border-gray-300 text-xl text-gray-700 bg-white transition ease-in-out mb-6"
               placeholder="Full name"
               id="name"
-              value={formData.name}
+              value={name}
               onChange={onChange}
               type="text"
             />
@@ -43,7 +64,7 @@ export default function SignUp() {
               className="w-full rounded border-gray-300 text-xl text-gray-700 bg-white transition ease-in-out"
               placeholder="Email address"
               id="email"
-              value={formData.email}
+              value={email}
               onChange={onChange}
               type="text"
             />
@@ -52,7 +73,7 @@ export default function SignUp() {
                 className="w-full rounded border-gray-300 text-xl text-gray-700 bg-white transition ease-in-out"
                 placeholder="Password"
                 id="password"
-                value={formData.password}
+                value={password}
                 onChange={onChange}
                 type={showPassword ? "text" : "password"}
               />
