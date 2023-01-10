@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import OAuth from "../components/OAuth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { toast } from "react-toastify";
+
 
 export default function SignIn() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const { email, password } = formData;
 
   const onChange = (e) => {
     setFormData((prevData) => ({
@@ -16,6 +22,20 @@ export default function SignIn() {
       [e.target.id]: e.target.value,
     }));
   };
+
+  const onSubmit = async(e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      if(userCredential.user){
+        toast.success("Signed in successfully")
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error("An error occured with the sign in")
+    }
+  }
   return (
     <section>
       <h1 className="text-center text-3xl font-bold mt-7 mb-10">Sign In</h1>
@@ -28,12 +48,12 @@ export default function SignIn() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
+          <form onSubmit={onSubmit}>
             <input
               className="w-full rounded border-gray-300 text-xl text-gray-700 bg-white transition ease-in-out"
               placeholder="Email address"
               id="email"
-              value={formData.email}
+              value={email}
               onChange={onChange}
               type="text"
             />
@@ -42,7 +62,7 @@ export default function SignIn() {
                 className="w-full rounded border-gray-300 text-xl text-gray-700 bg-white transition ease-in-out"
                 placeholder="Password"
                 id="password"
-                value={formData.password}
+                value={password}
                 onChange={onChange}
                 type={showPassword ? "text" : "password"}
               />

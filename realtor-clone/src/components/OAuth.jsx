@@ -4,8 +4,10 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export default function OAuth() {
+  const navigate = useNavigate();
   const onClickGoogle = async() => {
     try {
       const auth = getAuth();
@@ -23,6 +25,7 @@ export default function OAuth() {
         })
       }
       toast.success("Signed up successfully")
+      navigate("/")
     } catch (error) {
       toast.error("Failed to sign up")
     }
