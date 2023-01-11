@@ -47,7 +47,7 @@ export default function SignIn() {
             className="w-full rounded-2xl"
           />
         </div>
-        <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
+        <div className=" md:w-[67%] lg:w-[40%] lg:ml-20">
           <form onSubmit={onSubmit}>
             <input
               className="w-full rounded border-gray-300 text-xl text-gray-700 bg-white transition ease-in-out"
