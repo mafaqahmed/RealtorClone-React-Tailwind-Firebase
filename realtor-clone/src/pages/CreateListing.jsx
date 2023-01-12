@@ -20,14 +20,37 @@ export default function CreateListing() {
     bedrooms,
     bathrooms,
     parking,
-    furnsihed,
+    furnished,
     address,
     description,
     offer,
     regularPrice,
     discountedPrice,
   } = formData;
-  const onChange = () => {};
+  const onChange = (e) => {
+    let boolean;
+    if (e.target.value === "true") {
+      boolean = true;
+    }
+    if (e.target.value === "false") {
+      boolean = false;
+    }
+    if (e.target.files) {
+      setFormData((prevData) => ({
+        ...prevData,
+        images: e.target.files,
+      }));
+    }
+    if (!e.target.files) {
+      setFormData((prevData) => ({
+        ...prevData,
+        [e.target.id]: boolean ??  e.target.value,
+      }));
+    }
+    console.log(e.target.id);
+    console.log(e.target.value);
+    console.log(formData)
+  };
   return (
     <section className="w-full px-5 md:max-w-md mx-auto">
       <h1 className="text-center my-6 text-3xl text-black font-bold">
@@ -116,9 +139,9 @@ export default function CreateListing() {
               value={true}
               onClick={onChange}
               className={`uppercase text-sm font-medium w-full shadow-md py-3 rounded hover:shadow-lg active:shadow-lg focus:shadow-lg duration-150 transition ease-in-out ${
-                !parking
-                  ? "bg-white text-black"
-                  : "bg-slate-600 text-white shadow-lg"
+                parking
+                  ? "bg-slate-600 text-white shadow-lg"
+                  : "bg-white text-black"
               }`}
             >
               Yes
@@ -129,9 +152,9 @@ export default function CreateListing() {
               value={false}
               onClick={onChange}
               className={`uppercase text-sm font-medium w-full shadow-md py-2=3 rounded hover:shadow-lg active:shadow-lg focus:shadow-lg duration-150 transition ease-in-out ${
-                parking
-                  ? "bg-white text-black"
-                  : "bg-slate-600 text-white shadow-lg"
+                !parking
+                  ? "bg-slate-600 text-white shadow-lg"
+                  : "bg-white text-black"
               }`}
             >
               No
@@ -143,13 +166,13 @@ export default function CreateListing() {
           <div className="flex space-x-5">
             <button
               type="button"
-              id="furnsihed"
+              id="furnished"
               value={true}
               onClick={onChange}
               className={`uppercase text-sm font-medium w-full shadow-md py-3 rounded hover:shadow-lg active:shadow-lg focus:shadow-lg duration-150 transition ease-in-out ${
-                !furnsihed
-                  ? "bg-white text-black"
-                  : "bg-slate-600 text-white shadow-lg"
+                furnished
+                  ? "bg-slate-600 text-white shadow-lg"
+                  : "bg-white text-black"
               }`}
             >
               Yes
@@ -160,9 +183,9 @@ export default function CreateListing() {
               value={false}
               onClick={onChange}
               className={`uppercase text-sm font-medium w-full shadow-md py-2=3 rounded hover:shadow-lg active:shadow-lg focus:shadow-lg duration-150 transition ease-in-out ${
-                furnsihed
-                  ? "bg-white text-black"
-                  : "bg-slate-600 text-white shadow-lg"
+                !furnished
+                  ? "bg-slate-600 text-white shadow-lg"
+                  : "bg-white text-black"
               }`}
             >
               No
@@ -202,22 +225,22 @@ export default function CreateListing() {
               value={true}
               onClick={onChange}
               className={`uppercase text-sm font-medium w-full shadow-md py-3 rounded hover:shadow-lg active:shadow-lg focus:shadow-lg duration-150 transition ease-in-out ${
-                !offer
-                  ? "bg-white text-black"
-                  : "bg-slate-600 text-white shadow-lg"
+                offer
+                  ? "bg-slate-600 text-white shadow-lg"
+                  : "bg-white text-black"
               }`}
             >
               Yes
             </button>
             <button
               type="button"
-              id="furnished"
+              id="offer"
               value={false}
               onClick={onChange}
               className={`uppercase text-sm font-medium w-full shadow-md py-2=3 rounded hover:shadow-lg active:shadow-lg focus:shadow-lg duration-150 transition ease-in-out ${
-                offer
-                  ? "bg-white text-black"
-                  : "bg-slate-600 text-white shadow-lg"
+                !offer
+                  ? "bg-slate-600 text-white shadow-lg"
+                  : "bg-white text-black"
               }`}
             >
               No
@@ -285,7 +308,12 @@ export default function CreateListing() {
             className="border border-gray-300 w-full px-3 py-1.5 bg-white focus:bg-white focus:border-slate-400 rounded transition duration-150 ease-in-out hover:shadow-lg hover:border-gray-400"
           />
         </div>
-        <button type="submit" className="uppercase my-10 text-center w-full px-7 py-3 bg-blue-600 text-white text-md font-medium rounded shadow-md hover:shadow-lg hover:bg-blue-700 focus:bg-blue-800 active:bg-blue-800 transition duration-150 ease-in-out">Create listing</button>
+        <button
+          type="submit"
+          className="uppercase my-10 text-center w-full px-7 py-3 bg-blue-600 text-white text-md font-medium rounded shadow-md hover:shadow-lg hover:bg-blue-700 focus:bg-blue-800 active:bg-blue-800 transition duration-150 ease-in-out"
+        >
+          Create listing
+        </button>
       </form>
     </section>
   );
