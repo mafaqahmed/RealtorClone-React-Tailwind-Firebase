@@ -51,7 +51,7 @@ export default function Profile() {
   };
   return (
     <>
-      <section className="w-full md:w-[40%] flex justify-center items-center flex-col mx-auto">
+      <section className="w-full px-5 md:w-[40%] flex justify-center items-center flex-col mx-auto">
         <h1 className="text-center my-6 text-3xl font-bold">My Profile</h1>
         <div className="w-full">
           <form>
@@ -77,7 +77,7 @@ export default function Profile() {
                 "bg-red-300 focus:bg-red-300 border-gray-500 text-gray-700"
               }`}
             />
-            <div className="flex justify-between whitespace-nowrap text-sm md:text-lg mb-6">
+            <div className="flex justify-between whitespace-nowrap text-sm lg:text-lg mb-6">
               <p>
                 Do you want to change your name?{" "}
                 <span
