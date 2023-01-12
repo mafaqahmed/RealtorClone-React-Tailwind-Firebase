@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 export default function CreateListing() {
+  const [geolocationEnabled, setGeolocationEnabled] = useState(false)
   const [formData, setFormData] = useState({
     type: "rent",
     name: "",
@@ -13,6 +14,8 @@ export default function CreateListing() {
     offer: false,
     regularPrice: 50,
     discountedPrice: 50,
+    latitude:0,
+    longitude:0
   });
   const {
     type,
@@ -26,6 +29,8 @@ export default function CreateListing() {
     offer,
     regularPrice,
     discountedPrice,
+    latitude,
+    longitude
   } = formData;
   const onChange = (e) => {
     let boolean;
@@ -204,6 +209,34 @@ export default function CreateListing() {
             className="w-full px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
           />
         </div>
+        {!geolocationEnabled && (<div className="flex space-x-10 mb-6">
+          <div>
+            <p className="text-lg font-semibold">Latitude</p>
+            <input
+              type="number"
+              id="latitude"
+              value={latitude}
+              onChange={onChange}
+              min="-90"
+              max="90"
+              required = {!geolocationEnabled}
+              className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
+            />
+          </div>
+          <div>
+            <p className="text-lg font-semibold">Longitude</p>
+            <input
+              type="number"
+              id="longitude"
+              value={longitude}
+              onChange={onChange}
+              min="180"
+              max="-180"
+              required = {!geolocationEnabled}
+              className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
+            />
+          </div>
+        </div>)}
         <div className="my-6">
           <p className="text-lg font-semibold">Description</p>
           <textarea
@@ -256,7 +289,7 @@ export default function CreateListing() {
                 id="regularPrice"
                 value={regularPrice}
                 onChange={onChange}
-                min="0"
+                min="50"
                 max="400000000"
                 required
                 className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
@@ -279,7 +312,7 @@ export default function CreateListing() {
                   id="discountedPrice"
                   value={discountedPrice}
                   onChange={onChange}
-                  min="0"
+                  min="50"
                   max="400000000"
                   required={offer}
                   className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
