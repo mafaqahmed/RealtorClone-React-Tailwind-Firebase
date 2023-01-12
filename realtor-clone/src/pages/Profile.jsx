@@ -1,9 +1,10 @@
 import { getAuth, updateProfile } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../firebase";
+import { FcHome } from "react-icons/fc";
 
 export default function Profile() {
   const auth = getAuth();
@@ -76,7 +77,7 @@ export default function Profile() {
                 "bg-red-300 focus:bg-red-300 border-gray-500 text-gray-700"
               }`}
             />
-            <div className="flex justify-between whitespace-nowrap text-sm md:text-lg">
+            <div className="flex justify-between whitespace-nowrap text-sm md:text-lg mb-6">
               <p>
                 Do you want to change your name?{" "}
                 <span
@@ -94,6 +95,18 @@ export default function Profile() {
               </p>
             </div>
           </form>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 py-3 rounded uppercase text-white hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg"
+          >
+            <Link
+              to="/create-listing"
+              className="flex justify-center items-center"
+            >
+              <FcHome className="rounded-full text-3xl bg-red-200 border-2 p-1 mr-2" />
+              sell or rent your home
+            </Link>
+          </button>
         </div>
       </section>
     </>
