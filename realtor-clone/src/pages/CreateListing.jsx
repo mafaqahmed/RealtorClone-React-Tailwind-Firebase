@@ -1,7 +1,23 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import Spinner from "../components/Spinner.jsx";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { getAuth } from "firebase/auth";
+import { v4 as uuidv4 } from "uuid";
+import { serverTimestamp, collection, addDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { db } from "../firebase";
 
 export default function CreateListing() {
-  const [geolocationEnabled, setGeolocationEnabled] = useState(false)
+  const navigate = useNavigate();
+  const auth = getAuth();
+  const [loading, setLoading] = useState(false);
+  const geolocationEnabled = false;
   const [formData, setFormData] = useState({
     type: "rent",
     name: "",
@@ -14,8 +30,9 @@ export default function CreateListing() {
     offer: false,
     regularPrice: 50,
     discountedPrice: 50,
-    latitude:0,
-    longitude:0
+    latitude: 0,
+    longitude: 0,
+    images: {},
   });
   const {
     type,
@@ -30,7 +47,8 @@ export default function CreateListing() {
     regularPrice,
     discountedPrice,
     latitude,
-    longitude
+    longitude,
+    images,
   } = formData;
   const onChange = (e) => {
     let boolean;
@@ -49,19 +67,118 @@ export default function CreateListing() {
     if (!e.target.files) {
       setFormData((prevData) => ({
         ...prevData,
-        [e.target.id]: boolean ??  e.target.value,
+        [e.target.id]: boolean ?? e.target.value,
       }));
     }
-    console.log(e.target.id);
-    console.log(e.target.value);
-    console.log(formData)
   };
+  
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    let geolocation = {};
+    setLoading(true);
+
+    if (offer) {
+      if (+discountedPrice >= +regularPrice) {
+        setLoading(false);
+        toast.error("Discounted price must be lower than regular price");
+        return;
+      }
+    }
+
+    if (images.length > 6) {
+      setLoading(false);
+      toast.error("Maximum 6 images are allowed");
+      return;
+    }
+
+    if (!geolocationEnabled) {
+      geolocation.lat = latitude;
+      geolocation.long = longitude;
+    }
+
+    const uploadImages = async (image) => {
+      return new Promise((res, rej) => {
+        const storage = getStorage();
+        const storageRef = ref(
+          storage,
+          `${image.name}-${auth.currentUser.uid}-${uuidv4()}`
+        );
+        const uploadTask = uploadBytesResumable(storageRef, image);
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Upload is " + progress + "% done");
+            switch (snapshot.state) {
+              case "paused":
+                console.log("Upload is paused");
+                break;
+              case "running":
+                console.log("Upload is running");
+                break;
+              default:
+                console.log("default");
+            }
+          },
+          (error) => {
+            rej(error);
+          },
+          () => {
+            // Handle successful uploads on complete
+            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              res(downloadURL);
+            });
+          }
+        );
+      });
+    };
+
+    const imgUrls = await Promise.all(
+      [...images].map((image) => uploadImages(image))
+    ).catch((error) => {
+      setLoading(false);
+      toast.error("Image/s not uploaded");
+      return;
+    });
+
+    const formDataCopy = {
+      ...formData,
+      geolocation,
+      imgUrls,
+      timestamp: serverTimestamp(),
+      userRef: auth.currentUser.uid,
+    };
+
+    delete formDataCopy.latitude;
+    delete formDataCopy.longitude;
+    delete formDataCopy.images;
+    !formDataCopy.offer && delete formDataCopy.discountedPrice;
+
+    console.log(formDataCopy);
+
+    try {
+      const docRef = await addDoc(collection(db, "listings"), formDataCopy);
+      console.log(docRef);
+      setLoading(false);
+      toast.success("Listing created");
+      navigate(`/category/${formDataCopy.type}/${docRef.id}`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  if (loading) {
+    return <Spinner />;
+  }
+
   return (
     <section className="w-full px-5 md:max-w-md mx-auto">
       <h1 className="text-center my-6 text-3xl text-black font-bold">
         Create a Listing
       </h1>
-      <form>
+      <form onSubmit={onSubmit}>
         <div>
           <p className="text-lg font-semibold">Sell / Rent</p>
           <div className="flex space-x-5">
@@ -209,34 +326,36 @@ export default function CreateListing() {
             className="w-full px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
           />
         </div>
-        {!geolocationEnabled && (<div className="flex space-x-10 mb-6">
-          <div>
-            <p className="text-lg font-semibold">Latitude</p>
-            <input
-              type="number"
-              id="latitude"
-              value={latitude}
-              onChange={onChange}
-              min="-90"
-              max="90"
-              required = {!geolocationEnabled}
-              className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
-            />
+        {!geolocationEnabled && (
+          <div className="flex space-x-10 mb-6">
+            <div>
+              <p className="text-lg font-semibold">Latitude</p>
+              <input
+                type="number"
+                id="latitude"
+                value={latitude}
+                onChange={onChange}
+                min="-90"
+                max="90"
+                required={!geolocationEnabled}
+                className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
+              />
+            </div>
+            <div>
+              <p className="text-lg font-semibold">Longitude</p>
+              <input
+                type="number"
+                id="longitude"
+                value={longitude}
+                onChange={onChange}
+                min="-180"
+                max="180"
+                required={!geolocationEnabled}
+                className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-lg font-semibold">Longitude</p>
-            <input
-              type="number"
-              id="longitude"
-              value={longitude}
-              onChange={onChange}
-              min="180"
-              max="-180"
-              required = {!geolocationEnabled}
-              className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
-            />
-          </div>
-        </div>)}
+        )}
         <div className="my-6">
           <p className="text-lg font-semibold">Description</p>
           <textarea
