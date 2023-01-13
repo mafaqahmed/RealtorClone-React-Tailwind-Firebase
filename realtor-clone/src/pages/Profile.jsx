@@ -1,12 +1,23 @@
 import { getAuth, updateProfile } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
-import React, { useState } from "react";
+import {
+  doc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+} from "firebase/firestore";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../firebase";
 import { FcHome } from "react-icons/fc";
+import ListingItem from "../components/ListingItem";
 
 export default function Profile() {
+  const [loading, setLoading] = useState(true);
+  const [listings, setListings] = useState(Array);
   const auth = getAuth();
   const navigate = useNavigate();
   const user = auth.currentUser;
@@ -49,6 +60,30 @@ export default function Profile() {
       toast.error("Could not update your profile");
     }
   };
+
+  useEffect(() => {
+    async function fetchUserListings() {
+      const q = query(
+        collection(db, "listings"),
+        where("userRef", "==", auth.currentUser.uid),
+        orderBy("timestamp", "desc")
+      );
+      const querySnapshot = await getDocs(q);
+      let listings = [];
+      querySnapshot.forEach((doc) => {
+        return listings.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
+      setListings(listings);
+      setLoading(false)
+    };
+    fetchUserListings();
+  }, [auth.currentUser.uid]);
+  if(!loading){
+    console.log(listings)
+  }
   return (
     <>
       <section className="w-full px-5 md:w-[40%] flex justify-center items-center flex-col mx-auto">
@@ -109,6 +144,18 @@ export default function Profile() {
           </button>
         </div>
       </section>
+      <div>
+        {!loading && listings.length>0 && (
+          <div>
+            <p className="font-semibold text-3xl text-center">My Listings</p>
+            <ul>
+            {listings.map((listing)=> (
+              <ListingItem key={listing.id} id={listing.id} listing={listing.data} />
+            ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </>
   );
 }
