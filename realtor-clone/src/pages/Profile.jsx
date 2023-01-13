@@ -86,7 +86,7 @@ export default function Profile() {
   }
   return (
     <>
-      <section className="w-full px-5 md:w-[40%] flex justify-center items-center flex-col mx-auto">
+      <section className="w-full px-5 lg:w-[40%] flex justify-center items-center flex-col mx-auto">
         <h1 className="text-center my-6 text-3xl font-bold">My Profile</h1>
         <div className="w-full">
           <form>
@@ -144,11 +144,11 @@ export default function Profile() {
           </button>
         </div>
       </section>
-      <div>
+      <div className="mx-auto max-w-6xl mt-10 px-5">
         {!loading && listings.length>0 && (
           <div>
-            <p className="font-semibold text-3xl text-center">My Listings</p>
-            <ul>
+            <h1 className="font-semibold text-3xl text-center w-full mb-8">My Listings</h1>
+            <ul className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {listings.map((listing)=> (
               <ListingItem key={listing.id} id={listing.id} listing={listing.data} />
             ))}
