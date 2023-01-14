@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner.jsx";
 import {
@@ -9,11 +9,13 @@ import {
 } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
-import { serverTimestamp, collection, addDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { serverTimestamp, doc, getDoc, updateDoc } from "firebase/firestore";
+import { useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase";
 
-export default function CreateListing() {
+export default function EditListing() {
+    const [listing, setListing] = useState(null)
+    const params = useParams();
   const navigate = useNavigate();
   const auth = getAuth();
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,46 @@ export default function CreateListing() {
     longitude,
     images,
   } = formData;
+
+//   useEffect(()=>{
+//     if(listing.userRef !== auth.currentUser.uid){
+//         navigate("/")
+//         toast.error("You can't access this listing")
+//     }
+//   },[listing, auth.currentUser.uid, navigate])
+
+useEffect(() => {
+    if (listing && listing.userRef !== auth.currentUser.uid) {
+      toast.error("You can't edit this listing");
+      navigate("/");
+    }
+  }, [listing,auth.currentUser.uid, navigate]);
+
+  useEffect(()=>{
+    const fetchListing = async() => {
+        setLoading(true);
+        const docRef = doc(db, "listings", params.listingId)
+        const docSnap = await getDoc(docRef)
+        console.log(docSnap.data())
+        if (docSnap.exists()) {
+            setListing({...docSnap.data()})
+            const docSnapCopy = docSnap.data()
+            delete docSnapCopy.geolocation
+            delete docSnapCopy.timestamp
+            setFormData({
+                ...docSnapCopy,
+                latitude: docSnap.data().geolocation.lat,
+                longitude: docSnap.data().geolocation.long
+            })
+            setLoading(false);
+          } else {
+            navigate("/");
+            toast.error("Listing does not exist");
+          }
+    }
+    fetchListing()
+  },[params.listingId, navigate])
+
   const onChange = (e) => {
     let boolean;
     if (e.target.value === "true") {
@@ -159,10 +201,11 @@ export default function CreateListing() {
     console.log(formDataCopy);
 
     try {
-      const docRef = await addDoc(collection(db, "listings"), formDataCopy);
+      const docRef = doc(db, "listings", params.listingId);
+      await updateDoc(docRef, formDataCopy)
       console.log(docRef);
       setLoading(false);
-      toast.success("Listing created");
+      toast.success("Listing is edited");
       navigate(`/category/${formDataCopy.type}/${docRef.id}`);
     } catch (error) {
       toast.error(error)
@@ -176,7 +219,7 @@ export default function CreateListing() {
   return (
     <section className="w-full px-5 md:max-w-md mx-auto">
       <h1 className="text-center my-6 text-3xl text-black font-bold">
-        Create a Listing
+        Edit Listing
       </h1>
       <form onSubmit={onSubmit}>
         <div>
@@ -464,7 +507,7 @@ export default function CreateListing() {
           type="submit"
           className="uppercase my-10 text-center w-full px-7 py-3 bg-blue-600 text-white text-md font-medium rounded shadow-md hover:shadow-lg hover:bg-blue-700 focus:bg-blue-800 active:bg-blue-800 transition duration-150 ease-in-out"
         >
-          Create listing
+          Confirm Editing
         </button>
       </form>
     </section>
