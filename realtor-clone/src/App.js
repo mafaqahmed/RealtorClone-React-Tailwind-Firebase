@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import PrivateRoute from "./components/PrivateRoute";
 import CreateListing from "./pages/CreateListing";
 import EditListing from "./pages/EditListing";
+import Listing from "./pages/Listing";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route exact path="/edit-listing/:listingId" element={<EditListing />} />
           </Route>
           <Route exact path="/sign-in" element={<SignIn />} />
+          <Route exact path="/category/:categoryName/:listingId" element={<Listing />} />
           <Route exact path="/sign-up" element={<SignUp />} />
           <Route exact path="/forgot-password" element={<ForgotPassword />} />
           <Route exact path="/offers" element={<Offers />} />
