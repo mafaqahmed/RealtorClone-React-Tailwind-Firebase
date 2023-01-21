@@ -11,6 +11,7 @@ import SwiperCore, {
 } from "swiper";
 import Spinner from "../components/Spinner";
 import {
+  FaShare,
   FaMapMarkerAlt,
   FaBed,
   FaBath,
@@ -25,6 +26,7 @@ import "swiper/css/bundle";
 import Contact from "../components/Contact";
 
 export default function Listing() {
+  const [copied, setCopied] = useState(false);
   const [contactLandlord, setContactLandlord] = useState(false);
   const auth = getAuth();
   const [loading, setLoading] = useState(false);
@@ -64,10 +66,18 @@ export default function Listing() {
       userRef,
       geolocation,
     } = listing;
+
+    const onClick = () => {
+        navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => {
+        setCopied(false);
+        }, 1000);
+    }
     return (
       <>
         <Swiper
-          className="w-full h-80"
+          className="w-full h-80 relative"
           // install Swiper modules
           modules={[Navigation, Pagination, EffectFade, Autoplay]}
           slidesPerView={1}
@@ -87,6 +97,15 @@ export default function Listing() {
             ></SwiperSlide>
           ))}
         </Swiper>
+        <div className="fixed right-10 top-20 z-50 flex flex-col items-center w-24">
+          <FaShare
+            className="relative rounded-full bg-white text-gray-700 p-3 text-5xl cursor-pointer hover:shadow-lg shadow-md"
+            onClick={onClick}
+          />
+          {copied && <p
+            className="relative mt-2 rounded-lg bg-white text-gray-900 px-1 text-sm border border-gray-200"
+          >Link Copied!</p>}
+        </div>
         <div className="max-w-6xl mx-auto mt-4 p-4 flex md:space-x-5 bg-white shadow-lg flex-col space-y-3 md:space-y-0 md:flex-row">
           <div className="w-full">
             <div className="flex items-center mt-4">
@@ -173,9 +192,7 @@ export default function Listing() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <Marker position={[geolocation.lat, geolocation.long]}>
-                <Popup>
-                  {address}
-                </Popup>
+                <Popup>{address}</Popup>
               </Marker>
             </MapContainer>
           </div>
