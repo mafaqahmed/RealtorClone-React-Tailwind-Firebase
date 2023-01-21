@@ -139,7 +139,7 @@ export default function CreateListing() {
       [...images].map((image) => uploadImages(image))
     ).catch((error) => {
       setLoading(false);
-      toast.error("Image/s not uploaded");
+      toast.error("Image/s not uploaded. Please check your image size");
       return;
     });
 
@@ -448,7 +448,7 @@ export default function CreateListing() {
         <div>
           <p className="text-lg font-semibold">Images</p>
           <p className="text-md text-gray-800">
-            The first image will be the cover (max 6)
+            The first image will be the cover (max 6) and the image size must be less than 2mb
           </p>
           <input
             type="file"

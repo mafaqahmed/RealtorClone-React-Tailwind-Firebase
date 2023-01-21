@@ -2,15 +2,35 @@ import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { db } from "../firebase";
-
+import { Swiper, SwiperSlide } from "swiper/react";
+import SwiperCore, {
+  Navigation,
+  Pagination,
+  EffectFade,
+  Autoplay,
+} from "swiper";
 import Spinner from "../components/Spinner";
+import {
+  FaMapMarkerAlt,
+  FaBed,
+  FaBath,
+  FaParking,
+  FaChair,
+} from "react-icons/fa";
+import { getAuth } from "firebase/auth";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
-
+// Import Swiper styles
+import "swiper/css/bundle";
+import Contact from "../components/Contact";
 
 export default function Listing() {
+  const [contactLandlord, setContactLandlord] = useState(false);
+  const auth = getAuth();
   const [loading, setLoading] = useState(false);
   const [listing, setListing] = useState(null);
   const params = useParams();
+  SwiperCore.use([Autoplay, Navigation, Pagination]);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -27,21 +47,140 @@ export default function Listing() {
     return <Spinner />;
   }
 
-  listing && listing.imgUrls.map((img) => console.log(img));
-
-  return (
-    <>
-      {listing && listing.imgUrls.map((url, index) => (
-          <div key={index}>
-            <div
-              className="relative w-full overflow-hidden h-[300px] border border-black"
+  if (listing) {
+    const {
+      name,
+      offer,
+      discountedPrice,
+      regularPrice,
+      type,
+      imgUrls,
+      address,
+      description,
+      bedrooms,
+      bathrooms,
+      parking,
+      furnished,
+      userRef,
+      geolocation,
+    } = listing;
+    return (
+      <>
+        <Swiper
+          className="w-full h-80"
+          // install Swiper modules
+          modules={[Navigation, Pagination, EffectFade, Autoplay]}
+          slidesPerView={1}
+          navigation
+          pagination={{ type: "progressbar" }}
+          autoplay={{ delay: 3000 }}
+          effect="fade"
+        >
+          {imgUrls.map((img, index) => (
+            <SwiperSlide
+              key={index}
+              className="w-full h-full"
               style={{
-                background: `url(${listing.imgUrls[index]}) center no-repeat`,
+                background: `url(${img}) center no-repeat`,
                 backgroundSize: "cover",
               }}
-            ></div>
+            ></SwiperSlide>
+          ))}
+        </Swiper>
+        <div className="max-w-6xl mx-auto mt-4 p-4 flex md:space-x-5 bg-white shadow-lg flex-col space-y-3 md:space-y-0 md:flex-row">
+          <div className="w-full">
+            <div className="flex items-center mt-4">
+              <p className="text-blue-900 font-bold text-2xl">
+                {name} - $
+                {offer
+                  ? discountedPrice
+                      .toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  : regularPrice
+                      .toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                {type === "rent" ? " / Month" : ""}
+              </p>
+            </div>
+            <div className="mt-3 flex items-center">
+              <FaMapMarkerAlt className="text-green-600 text-lg" />
+              <p className=" ml-1 font-medium">{address}</p>
+            </div>
+            <div className="mt-3 flex items-center space-x-2 w-[75%]">
+              <p className="bg-red-800 text-white rounded-md text-center py-1 shadow-lg font-medium w-full">
+                For {type === "rent" ? "Rent" : "Sale"}
+              </p>
+              {offer && (
+                <p className="bg-green-800 text-white rounded-md text-center py-1 shadow-lg font-medium w-full">
+                  ${regularPrice - discountedPrice} Discount{" "}
+                  {type === "rent" ? "/ Month" : ""}
+                </p>
+              )}
+            </div>
+            <div className="mt-3">
+              <span className="font-medium">Description - </span>
+              {description}
+            </div>
+            <div className="mt-3 flex items-center space-x-10">
+              <div className="flex items-center whitespace-nowrap">
+                <FaBed />
+                <p className="ml-1 text-sm font-medium">
+                  {bedrooms === "1" ? "1 bed" : `${bedrooms} beds`}
+                </p>
+              </div>
+              <div className="flex items-center whitespace-nowrap">
+                <FaBath />
+                <p className="ml-1 text-sm font-medium">
+                  {bathrooms === "1" ? "1 bed" : `${bathrooms} beds`}
+                </p>
+              </div>
+              <div className="flex items-center whitespace-nowrap">
+                <FaParking />
+                <p className="ml-1 text-sm font-medium">
+                  {parking ? "Parking" : "No Parking"}
+                </p>
+              </div>
+              <div className="flex items-center whitespace-nowrap">
+                <FaChair />
+                <p className="ml-1 text-sm font-medium">
+                  {furnished ? "Furnished" : "Not Furnished"}
+                </p>
+              </div>
+            </div>
+            {userRef !== auth.currentUser.uid && !contactLandlord && (
+              <button
+                onClick={() => {
+                  setContactLandlord(true);
+                }}
+                className="mt-5 w-full text-center text-white font-semibold bg-blue-600 py-2 text-lg rounded shadow-md transition duration-150 ease-in-out hover:bg-blue-700 hover:shadow-lg focus:bg-blue-800 focus:shadow-xl"
+              >
+                Contact Landlord
+              </button>
+            )}
+            <div className="mt-5 w-full">
+              {contactLandlord && <Contact listing={listing} />}
+            </div>
           </div>
-        ))}
-    </>
-  );
+          <div className="w-full border border-black h-80">
+            <MapContainer
+              center={[geolocation.lat, geolocation.long]}
+              zoom={13}
+              scrollWheelZoom={false}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker position={[geolocation.lat, geolocation.long]}>
+                <Popup>
+                  {address}
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        </div>
+      </>
+    );
+  }
 }

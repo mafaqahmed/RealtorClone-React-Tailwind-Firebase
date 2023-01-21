@@ -53,13 +53,6 @@ export default function EditListing() {
     images,
   } = formData;
 
-//   useEffect(()=>{
-//     if(listing.userRef !== auth.currentUser.uid){
-//         navigate("/")
-//         toast.error("You can't access this listing")
-//     }
-//   },[listing, auth.currentUser.uid, navigate])
-
 useEffect(() => {
     if (listing && listing.userRef !== auth.currentUser.uid) {
       toast.error("You can't edit this listing");
@@ -181,7 +174,7 @@ useEffect(() => {
       [...images].map((image) => uploadImages(image))
     ).catch((error) => {
       setLoading(false);
-      toast.error("Image/s not uploaded");
+      toast.error(error);
       return;
     });
 
@@ -491,7 +484,7 @@ useEffect(() => {
         <div>
           <p className="text-lg font-semibold">Images</p>
           <p className="text-md text-gray-800">
-            The first image will be the cover (max 6)
+            The first image will be the cover (max 6) adn the iamge size must be less than 2mb
           </p>
           <input
             type="file"
