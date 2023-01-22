@@ -6,6 +6,7 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
+  deleteObject,
 } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
@@ -14,8 +15,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase";
 
 export default function EditListing() {
-    const [listing, setListing] = useState(null)
-    const params = useParams();
+  const [deletedImages, setDeletedImages] = useState(false);
+  const [listing, setListing] = useState(null);
+  const params = useParams();
   const navigate = useNavigate();
   const auth = getAuth();
   const [loading, setLoading] = useState(false);
@@ -53,37 +55,37 @@ export default function EditListing() {
     images,
   } = formData;
 
-useEffect(() => {
+  useEffect(() => {
     if (listing && listing.userRef !== auth.currentUser.uid) {
       toast.error("You can't edit this listing");
       navigate("/");
     }
-  }, [listing,auth.currentUser.uid, navigate]);
+  }, [listing, auth.currentUser.uid, navigate]);
 
-  useEffect(()=>{
-    const fetchListing = async() => {
-        setLoading(true);
-        const docRef = doc(db, "listings", params.listingId)
-        const docSnap = await getDoc(docRef)
-        console.log(docSnap.data())
-        if (docSnap.exists()) {
-            setListing({...docSnap.data()})
-            const docSnapCopy = docSnap.data()
-            delete docSnapCopy.geolocation
-            delete docSnapCopy.timestamp
-            setFormData({
-                ...docSnapCopy,
-                latitude: docSnap.data().geolocation.lat,
-                longitude: docSnap.data().geolocation.long
-            })
-            setLoading(false);
-          } else {
-            navigate("/");
-            toast.error("Listing does not exist");
-          }
-    }
-    fetchListing()
-  },[params.listingId, navigate])
+  useEffect(() => {
+    const fetchListing = async () => {
+      setLoading(true);
+      const docRef = doc(db, "listings", params.listingId);
+      const docSnap = await getDoc(docRef);
+      console.log(docSnap.data());
+      if (docSnap.exists()) {
+        setListing({ ...docSnap.data() });
+        const docSnapCopy = docSnap.data();
+        delete docSnapCopy.geolocation;
+        delete docSnapCopy.timestamp;
+        setFormData({
+          ...docSnapCopy,
+          latitude: docSnap.data().geolocation.lat,
+          longitude: docSnap.data().geolocation.long,
+        });
+        setLoading(false);
+      } else {
+        navigate("/");
+        toast.error("Listing does not exist");
+      }
+    };
+    fetchListing();
+  }, [params.listingId, navigate]);
 
   const onChange = (e) => {
     let boolean;
@@ -106,7 +108,19 @@ useEffect(() => {
       }));
     }
   };
-  
+
+  const deleteImages = async() => {
+    const storage = getStorage();
+    const docRef = doc(db, "listings", params.listingId);
+    const docSnap = await getDoc(docRef);
+    const data = docSnap.data();
+    data.imgUrls.map(async(image)=>{
+      const desertRef = ref(storage, `${image}`);
+      await deleteObject(desertRef);
+    })
+    setDeletedImages(true);
+  }
+
   const onSubmit = async (e) => {
     e.preventDefault();
     let geolocation = {};
@@ -195,13 +209,13 @@ useEffect(() => {
 
     try {
       const docRef = doc(db, "listings", params.listingId);
-      await updateDoc(docRef, formDataCopy)
+      await updateDoc(docRef, formDataCopy);
       console.log(docRef);
       setLoading(false);
       toast.success("Listing is edited");
       navigate(`/category/${formDataCopy.type}/${docRef.id}`);
     } catch (error) {
-      toast.error(error)
+      toast.error(error);
     }
   };
 
@@ -484,9 +498,12 @@ useEffect(() => {
         <div>
           <p className="text-lg font-semibold">Images</p>
           <p className="text-md text-gray-800">
-            The first image will be the cover (max 6) adn the iamge size must be less than 2mb
+            The first image will be the cover (max 6) adn the image size must be
+            less than 2mb
           </p>
+          <div className="">
           <input
+            disabled={!deletedImages}
             type="file"
             id="images"
             onChange={onChange}
@@ -495,6 +512,8 @@ useEffect(() => {
             multiple
             className="border border-gray-300 w-full px-3 py-1.5 bg-white focus:bg-white focus:border-slate-400 rounded transition duration-150 ease-in-out hover:shadow-lg hover:border-gray-400"
           />
+          <button className="bg-red-500 text-white mt-2 rounded cursor-pointer px-1" onClick = {deleteImages}>Delete Previous Images</button>
+          </div>
         </div>
         <button
           type="submit"
