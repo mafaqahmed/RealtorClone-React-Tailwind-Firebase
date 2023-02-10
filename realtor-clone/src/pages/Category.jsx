@@ -7,12 +7,14 @@ import {
   startAfter,
   where,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
 import Spinner from "../components/Spinner";
 import { db } from "../firebase";
 
-export default function Offers() {
+export default function Category() {
+  const params = useParams();
   const [lastListing, setLastListing] = useState(null);
   const [listings, setListings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export default function Offers() {
       const listingsRef = collection(db, "listings");
       const q = query(
         listingsRef,
-        where("offer", "==", true),
+        where("type", "==", params.categoryType),
         orderBy("timestamp", "desc"),
         limit(8)
       );
@@ -39,13 +41,14 @@ export default function Offers() {
       setLoading(false);
     };
     fetchListings();
-  }, []);
+  }, [params.categoryType]);
+
 
   const onFetchMoreData = async () => {
     const listingsRef = collection(db, "listings");
     const q = query(
       listingsRef,
-      where("offer", "==", true),
+      where("type", "==", params.categoryType),
       orderBy("timestamp", "desc"),
       startAfter(lastListing),
       limit(4)
@@ -68,7 +71,7 @@ export default function Offers() {
     <>
       <div className="px-3 max-w-6xl mx-auto flex flex-col items-center">
         <p className="my-5 font-semibold text-4xl">
-          Offers
+          Places for {params.categoryType}
         </p>
         {listings && (
           <ul className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">

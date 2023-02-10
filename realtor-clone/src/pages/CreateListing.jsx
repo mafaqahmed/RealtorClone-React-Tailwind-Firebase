@@ -337,6 +337,7 @@ export default function CreateListing() {
                 onChange={onChange}
                 min="-90"
                 max="90"
+                step='any'
                 required={!geolocationEnabled}
                 className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
               />
@@ -350,6 +351,7 @@ export default function CreateListing() {
                 onChange={onChange}
                 min="-180"
                 max="180"
+                step='any'
                 required={!geolocationEnabled}
                 className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
               />

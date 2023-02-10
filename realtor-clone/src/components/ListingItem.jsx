@@ -56,12 +56,17 @@ export default function ListingItem({ id, listing, onEdit, onDelete }) {
           <div>
             <p className="font-bold text-xs">
               {listing.bethrooms > 1 ? `${listing.bethrooms} bath` : "1 Bath"}
-            </p>
+            </p>  
           </div>
         </div>
       </Link>
-      <FaTrash className="absolute bottom-3 right-2 cursor-pointer text-red-500 text-sm" onClick={onDelete}/>
-      <MdEdit className="absolute bottom-3 right-7 cursor-pointer" onClick={onEdit}/>
+      {onDelete && 
+      (<FaTrash className="absolute bottom-3 right-2 cursor-pointer text-red-500 text-sm" onClick={onDelete}/>)
+      }
+      {
+        onEdit &&
+      (<MdEdit className="absolute bottom-3 right-7 cursor-pointer" onClick={onEdit}/>)
+      }
     </li>
   );
 }

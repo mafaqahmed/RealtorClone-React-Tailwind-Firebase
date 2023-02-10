@@ -387,6 +387,7 @@ export default function EditListing() {
                 onChange={onChange}
                 min="-90"
                 max="90"
+                step='any'
                 required={!geolocationEnabled}
                 className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
               />
@@ -400,6 +401,7 @@ export default function EditListing() {
                 onChange={onChange}
                 min="-180"
                 max="180"
+                step='any'
                 required={!geolocationEnabled}
                 className="w-full text-center px-4 text-lg border bg-white border-slate-300 text-gray-500 rounded transition duration-150 ease-in-out shadow-md focus:shadow-lg focus:border-slate-400 focus:bg-white focus:text-gray-600"
               />
@@ -512,7 +514,7 @@ export default function EditListing() {
             multiple
             className="border border-gray-300 w-full px-3 py-1.5 bg-white focus:bg-white focus:border-slate-400 rounded transition duration-150 ease-in-out hover:shadow-lg hover:border-gray-400"
           />
-          <button className="bg-red-500 text-white mt-2 rounded cursor-pointer px-1" onClick = {deleteImages}>Delete Previous Images</button>
+          <button type="button" className="bg-red-500 text-white mt-2 rounded cursor-pointer px-1" onClick = {deleteImages}>Delete Previous Images</button>
           </div>
         </div>
         <button
