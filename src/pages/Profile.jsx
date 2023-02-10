@@ -8,7 +8,13 @@ import {
   where,
   orderBy,
   getDocs,
+  getDoc
 } from "firebase/firestore";
+import {
+  getStorage,
+  ref,
+  deleteObject,
+} from "firebase/storage";
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -78,28 +84,36 @@ export default function Profile() {
         });
       });
       setListings(listings);
-      setLoading(false)
-    };
+      setLoading(false);
+    }
     fetchUserListings();
   }, [auth.currentUser.uid]);
-  if(!loading){
-    console.log(listings)
+  if (!loading) {
+    console.log(listings);
   }
 
   const onEdit = (id) => {
-    navigate(`/edit-listing/${id}`)
-  }
-  const onDelete = async(id) => {
-    if(window.confirm("Are you sure you want to delete this?")) {
+    navigate(`/edit-listing/${id}`);
+  };
+  const onDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this?")) {
       await deleteDoc(doc(db, "listings", id));
       const filterListings = (element) => {
-        return element.id !== id
-      }
+        return element.id !== id;
+      };
       const updatedListings = listings.filter(filterListings);
-      setListings(updatedListings)
-      toast.success("The listing is deleted successfully")
+      setListings(updatedListings);
+      const storage = getStorage();
+      const docRef = doc(db, "listings", id);
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+      data.imgUrls.map(async (image) => {
+        const desertRef = ref(storage, `${image}`);
+        await deleteObject(desertRef);
+      });
+      toast.success("The listing is deleted successfully");
     }
-  }
+  };
   return (
     <>
       <section className="w-full px-5 lg:w-[40%] flex justify-center items-center flex-col mx-auto">
@@ -161,13 +175,21 @@ export default function Profile() {
         </div>
       </section>
       <div className="mx-auto max-w-6xl mt-10 px-5">
-        {!loading && listings.length>0 && (
+        {!loading && listings.length > 0 && (
           <div>
-            <h1 className="font-semibold text-3xl text-center w-full mb-8">My Listings</h1>
+            <h1 className="font-semibold text-3xl text-center w-full mb-8">
+              My Listings
+            </h1>
             <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-            {listings.map((listing)=> (
-              <ListingItem key={listing.id} id={listing.id} listing={listing.data} onEdit={() => onEdit(listing.id)} onDelete={() => onDelete(listing.id)}/>
-            ))}
+              {listings.map((listing) => (
+                <ListingItem
+                  key={listing.id}
+                  id={listing.id}
+                  listing={listing.data}
+                  onEdit={() => onEdit(listing.id)}
+                  onDelete={() => onDelete(listing.id)}
+                />
+              ))}
             </ul>
           </div>
         )}
