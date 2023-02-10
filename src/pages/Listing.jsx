@@ -166,7 +166,7 @@ export default function Listing() {
                 </p>
               </div>
             </div>
-            {userRef !== auth.currentUser.uid && !contactLandlord && (
+            {userRef !== auth.currentUser?.uid && !contactLandlord && (
               <button
                 onClick={() => {
                   setContactLandlord(true);
