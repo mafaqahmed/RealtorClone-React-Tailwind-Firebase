@@ -36,7 +36,7 @@ export default function Slider() {
       } catch {}
     };
     fetchListing();
-  });
+  }, []);
   if (loading) {
     return <Spinner />;
   }
