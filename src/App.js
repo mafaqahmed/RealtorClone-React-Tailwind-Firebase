@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import Header from "./components/Header";
 import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
@@ -17,7 +17,6 @@ import Category from "./pages/Category";
 function App() {
   return (
     <>
-      <Router>
         <Header />
         <Routes>
           <Route exact path="/" element={<Home />} />
@@ -38,7 +37,6 @@ function App() {
           <Route exact path="/offers" element={<Offers />} />
           <Route exact path="/create-listing" element={<CreateListing />} />
         </Routes>
-      </Router>
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
