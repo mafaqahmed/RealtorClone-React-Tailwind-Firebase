@@ -66,8 +66,8 @@ export default function Offers() {
   if (loading) return <Spinner />;
   return (
     <>
-      <div className="px-3 max-w-6xl mx-auto flex flex-col items-center">
-        <p className="my-5 font-semibold text-4xl">
+      <div className="px-3 max-w-6xl mx-auto ">
+        <p className="my-5 font-semibold text-4xl text-center">
           Offers
         </p>
         {listings && (

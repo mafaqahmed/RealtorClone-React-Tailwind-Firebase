@@ -82,7 +82,7 @@ export default function Header() {
       </div>
       {mobileMenu && <ul className="flex flex-col sm:hidden">
             <li
-              className={`py-3 px-3 text-sm text-gray-400 cursor-pointer border-b-2 ${
+              className={`py-3 px-3 text-sm text-gray-500 cursor-pointer border-b-2 ${
                 pathCheck("/") && "border-b-red-900 text-black"
               }`}
               onClick={() => {
@@ -93,7 +93,7 @@ export default function Header() {
               Home
             </li>
             <li
-              className={`py-3 px-3 text-sm text-gray-400 cursor-pointer border-b-2 ${
+              className={`py-3 px-3 text-sm text-gray-500 cursor-pointer border-b-2 ${
                 pathCheck("/offers") && "border-b-red-900 text-black"
               }`}
               onClick={() => {
@@ -104,7 +104,7 @@ export default function Header() {
               Offers
             </li>
             <li
-              className={`py-3 px-3 text-sm text-gray-400 cursor-pointer border-b-2 ${
+              className={`py-3 px-3 text-sm text-gray-500 cursor-pointer border-b-2 ${
                 (pathCheck("/sign-in") || pathCheck("/profile")) &&
                 "border-b-red-900 text-black"
               }`}
